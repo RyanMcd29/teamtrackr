@@ -1,3 +1,5 @@
+const store = require('./Assets/js/store.js')
+
 const mysql = require ('mysql2')
 const inquirer = require('inquirer')
 const consoleTable = require('console.table')
@@ -14,7 +16,7 @@ const db = mysql.createConnection(
 
 function selectOption() {
     inquirer
-        .prompt[
+        .prompt([
             {
                 type: 'list',
                 message: 'What would you like to do next?',
@@ -23,11 +25,11 @@ function selectOption() {
                             'View All Roles', 'Add Role', 'View Department', 'Add Department',
                             'Quit'  ]
             }
-        ]
+        ])
         .then((answer) => {
             switch (answer.menuOption){
                 case 'View All Employees':
-                
+                 store.viewAll()
                 break;
                 case 'Add Employee':
 
@@ -51,7 +53,8 @@ function selectOption() {
 
                 break;
             }
-        }
-        )
+        })
 }
+
+selectOption()
 
