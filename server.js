@@ -2,7 +2,7 @@ const store = require('./Assets/js/store.js')
 
 const mysql = require ('mysql2')
 const inquirer = require('inquirer')
-const consoleTable = require('console.table')
+const cTable = require('console.table')
 
 const db = mysql.createConnection(
     {
@@ -14,6 +14,45 @@ const db = mysql.createConnection(
     console.log('Connected to employee_db')
 );
 
+function viewAllEmployees(){
+    db.query('SELECT * FROM employee', function (err, results) { console.table(cTable.getTable(results)) })
+}
+
+function addEmployee (){
+    inquirer
+        .prompt([
+            {
+                type: 'input',
+                message: "What is this employee's first name?",
+                name: "firstName"
+            },
+            {
+                type: 'input',
+                message: "What is this employee's last name?",
+                name: "lastName"
+            },
+            {
+                type: 'list',
+                message: "What is this employee's role?",
+                name: "role",
+                choices: ['test']
+            },
+            {
+                type: 'list',
+                message: "Who is this employee's manager?",
+                name: "manager",
+                choices: ['test']
+            },
+        ])
+        .then((inputs) => 
+        {   const { firstName, lastName, role, manager } = inputs
+            db.query(`
+            INSERT INTO employee(first_name, last_name, role_id, manager_id
+            VALUES
+                (${firstName}, ${lastName}, ${role}, ${manager})`
+            )
+        } );
+}
 function selectOption() {
     inquirer
         .prompt([
@@ -29,10 +68,10 @@ function selectOption() {
         .then((answer) => {
             switch (answer.menuOption){
                 case 'View All Employees':
-                 store.viewAll()
+                    viewAllEmployees()
                 break;
                 case 'Add Employee':
-
+                    addEmployee()
                 break;
                 case 'Update Employee Role':
 
