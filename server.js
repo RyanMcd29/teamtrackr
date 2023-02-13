@@ -46,11 +46,13 @@ function addEmployee (){
         ])
         .then((inputs) => 
         {   const { firstName, lastName, role, manager } = inputs
+            // get ID of manager
+
             db.query(`
             INSERT INTO employee(first_name, last_name, role_id, manager_id
             VALUES
-                (${firstName}, ${lastName}, ${role}, ${manager})`
-            )
+                (${firstName}, ${lastName}, ${role}, ${manager})
+            `)
         } );
 }
 
@@ -71,7 +73,26 @@ function addRole() {}
 
 function viewAllDepartments(){}
     db.execute('SELECT * FROM department', function (err, results) { console.table(cTable.getTable(results)) })
-function addDepartment() {}
+
+function addDepartment() {
+    inquirer
+        .prompt([
+            {
+                type: 'input',
+                message: 'What is the name of the department?',
+                name: 'name'
+            }
+        ])
+        .then((input) => 
+        {
+            const { name } = input;
+            db.query(`
+            INSERT INTO department(name)
+                VALUES
+                    (${name})
+            `)    
+        })
+}
 
 function selectOption() {
     inquirer
