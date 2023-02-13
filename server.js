@@ -2,7 +2,8 @@ const store = require('./Assets/js/store.js')
 
 const mysql = require ('mysql2')
 const inquirer = require('inquirer')
-const cTable = require('console.table')
+const cTable = require('console.table');
+const { viewAllRoles } = require('./Assets/js/store.js');
 
 const db = mysql.createConnection(
     {
@@ -15,7 +16,8 @@ const db = mysql.createConnection(
 );
 
 function viewAllEmployees(){
-    db.query('SELECT * FROM employee', function (err, results) { console.table(cTable.getTable(results)) })
+    
+    db.execute('SELECT * FROM employee', function (err, results) { console.table(cTable.getTable(results)) })
 }
 
 function addEmployee (){
@@ -53,6 +55,20 @@ function addEmployee (){
             )
         } );
 }
+
+function updateEmployee() {
+    let employeeNames = db.execute('SELECT id, first_name, last_name FROM employee', function (err, results) {results});
+    console.log(employeeNames)
+    inquirer   
+        .prompt([
+
+        ])
+}
+
+function viewAllRoles() {
+    db.execute('SELECT * FROM roles', function (err, results) { console.table(cTable.getTable(results)) })
+}
+
 function selectOption() {
     inquirer
         .prompt([
@@ -74,13 +90,13 @@ function selectOption() {
                     addEmployee()
                 break;
                 case 'Update Employee Role':
-
+                    updateEmployee()
                 break;
                 case 'View All Roles':
-
+                    viewAllRoles()
                 break;
                 case 'Add Role':
-
+                    
                 break;
                 case 'View Department':
 
