@@ -1,9 +1,7 @@
-const store = require('./Assets/js/store.js')
-
 const mysql = require ('mysql2')
 const inquirer = require('inquirer')
 const cTable = require('console.table');
-const { viewAllRoles } = require('./Assets/js/store.js');
+
 
 const db = mysql.createConnection(
     {
@@ -66,8 +64,14 @@ function updateEmployee() {
 }
 
 function viewAllRoles() {
-    db.execute('SELECT * FROM roles', function (err, results) { console.table(cTable.getTable(results)) })
+    db.execute('SELECT * FROM role', function (err, results) { console.table(cTable.getTable(results)) })
 }
+
+function addRole() {}
+
+function viewAllDepartments(){}
+    db.execute('SELECT * FROM department', function (err, results) { console.table(cTable.getTable(results)) })
+function addDepartment() {}
 
 function selectOption() {
     inquirer
@@ -77,7 +81,7 @@ function selectOption() {
                 message: 'What would you like to do next?',
                 name: 'menuOption',
                 choices: [  'View All Employees', 'Add Employee', 'Update Employee Role',
-                            'View All Roles', 'Add Role', 'View Department', 'Add Department',
+                            'View All Roles', 'Add Role', 'View All Departments', 'Add Department',
                             'Quit'  ]
             }
         ])
@@ -99,7 +103,7 @@ function selectOption() {
                     
                 break;
                 case 'View Department':
-
+                    viewAllDepartments()
                 break;
                 case 'Add Department':
 
