@@ -1,23 +1,17 @@
-const mysql = require ('mysql2')
 const inquirer = require('inquirer')
 const cTable = require('console.table');
-
-
-const db = mysql.createConnection(
-    {
-        host: 'localhost',
-        user: 'root',
-        password: 'Bootcamp',
-        database: 'employee_db'
-    },
-    console.log('Connected to employee_db')
-);
-
-function viewAllEmployees(){
+const db = require("./db")
+// function viewAllEmployees(){
     
-    db.execute('SELECT * FROM employee', function (err, results) { console.table(cTable.getTable(results)) })
-}
+//     db.execute('SELECT * FROM employee', function (err, results) { console.table(cTable.getTable(results)) })
+// }
 
+function viewAllEmployees() {
+    db.viewAllEmployees()
+        .then(([rows]) => {
+            console.log(employees)
+        })
+}
 function addEmployee (){
     inquirer
         .prompt([
@@ -51,7 +45,7 @@ function addEmployee (){
             db.query(`
             INSERT INTO employee(first_name, last_name, role_id, manager_id
             VALUES
-                (${firstName}, ${lastName}, ${role}, ${manager})
+                ("${firstName}", "${lastName}", ${role}, ${manager})
             `)
         } );
 }
@@ -83,14 +77,13 @@ function addDepartment() {
                 name: 'name'
             }
         ])
-        .then((input) => 
-        {
-            const { name } = input;
-            db.query(`
-            INSERT INTO department(name)
-                VALUES
-                    (${name})
-            `)    
+        .then(response => {
+            let name = response;
+            db.addDepartment(name)
+                .then(() => console.log(`added ${name.name} to db`))
+
+                // run func to load other prompts
+                .then(() => console.log(' load main prompts'))
         })
 }
 
@@ -127,7 +120,7 @@ function selectOption() {
                     viewAllDepartments()
                 break;
                 case 'Add Department':
-
+                    addDepartment()
                 break;
                 case 'Quit':
 
