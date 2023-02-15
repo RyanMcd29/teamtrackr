@@ -13,12 +13,21 @@ const db = mysql.createConnection(
     console.log('Connected to employee_db')
 );
 
-function viewAllEmployees(){
-    
-    db.execute('SELECT * FROM employee', function (err, results) { console.table(cTable.getTable(results)) })
+const getManagers = async () => {
+    const managers = await db.query('SELECT first_name, last_name FROM employee where manager_id = null');
+    return managers;
 }
 
+function viewAllEmployees() {
+        db.execute('SELECT first_name, last_name, title, salary, name AS department_name FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id;', function (err, results) {
+            console.table(cTable.getTable(results))
+        });
+}
+
+
 function addEmployee (){
+    getManagers()
+
     inquirer
         .prompt([
             {
@@ -45,15 +54,14 @@ function addEmployee (){
             },
         ])
         .then((inputs) => 
-        {   const { firstName, lastName, role, manager } = inputs
-            // get ID of manager
-
-            db.query(`
-            INSERT INTO employee(first_name, last_name, role_id, manager_id
-            VALUES
-                (${firstName}, ${lastName}, ${role}, ${manager})
-            `)
-        } );
+            {   const { firstName, lastName, role, manager } = inputs
+                // get ID of manager
+                db.query(`
+                INSERT INTO employee(first_name, last_name, role_id, manager_id
+                VALUES
+                ${firstName},  ${lastName}, ${role}, ${manager})
+                `)
+            } );
 }
 
 function updateEmployee() {
@@ -66,13 +74,15 @@ function updateEmployee() {
 }
 
 function viewAllRoles() {
-    db.execute('SELECT * FROM role', function (err, results) { console.table(cTable.getTable(results)) })
+    db.execute('SELECT title, salary, name AS department_name FROM role JOIN department ON role.department_id = department.id;', function (err, results) { 
+        console.table(cTable.getTable(results)) 
+    })
 }
 
 function addRole() {}
 
 function viewAllDepartments(){}
-    db.execute('SELECT * FROM department', function (err, results) { console.table(cTable.getTable(results)) })
+    db.execute('SELECT name FROM department', function (err, results) { console.table(cTable.getTable(results)) })
 
 function addDepartment() {
     inquirer
@@ -127,7 +137,7 @@ function selectOption() {
                     viewAllDepartments()
                 break;
                 case 'Add Department':
-
+                    addDepartment()
                 break;
                 case 'Quit':
 
