@@ -14,8 +14,20 @@ const db = mysql.createConnection(
 );
 
 const getManagers = async () => {
-    const managers = await db.query('SELECT first_name, last_name FROM employee where manager_id = null');
-    return managers;
+    let managers = await db.query('SELECT first_name, last_name, id FROM employee where manager_id is NULL;')
+    console.log(managers)
+}
+
+function getRoles(){
+    db.execute('SELECT title, id FROM role', function (err, results) {
+
+    })
+}
+
+function getDepartments() {
+    db.execute('SELECT name, id FROM department', function (err,results){
+
+    })
 }
 
 function viewAllEmployees() {
@@ -25,10 +37,10 @@ function viewAllEmployees() {
 }
 
 
-function addEmployee (){
-    getManagers()
-
-    inquirer
+function addEmployee () {
+    // getManagers()
+    
+    inquirer 
         .prompt([
             {
                 type: 'input',
@@ -50,18 +62,18 @@ function addEmployee (){
                 type: 'list',
                 message: "Who is this employee's manager?",
                 name: "manager",
-                choices: ['test']
+                choices: []
             },
         ])
-        .then((inputs) => 
-            {   const { firstName, lastName, role, manager } = inputs
-                // get ID of manager
-                db.query(`
-                INSERT INTO employee(first_name, last_name, role_id, manager_id
-                VALUES
-                ${firstName},  ${lastName}, ${role}, ${manager})
-                `)
-            } );
+        .then((inputs) => {
+            const { firstName, lastName, role, manager } = inputs
+            db.query(`
+            INSERT INTO employee(first_name, last_name, role_id, manager_id
+            VALUES
+            ${firstName},  ${lastName}, ${role}, ${manager})
+            `)
+        } );
+    
 }
 
 function updateEmployee() {
@@ -79,7 +91,9 @@ function viewAllRoles() {
     })
 }
 
-function addRole() {}
+function addRole() {
+
+}
 
 function viewAllDepartments(){}
     db.execute('SELECT name FROM department', function (err, results) { console.table(cTable.getTable(results)) })
@@ -131,7 +145,7 @@ function selectOption() {
                     viewAllRoles()
                 break;
                 case 'Add Role':
-                    
+                    addRole()
                 break;
                 case 'View Department':
                     viewAllDepartments()
@@ -140,8 +154,7 @@ function selectOption() {
                     addDepartment()
                 break;
                 case 'Quit':
-
-                break;
+                    process.exit()
             }
         })
 }
