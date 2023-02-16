@@ -13,9 +13,17 @@ const db = mysql.createConnection(
     console.log('Connected to employee_db')
 );
 
-const getManagers = async () => {
-    let managers = await db.query('SELECT first_name, last_name, id FROM employee where manager_id is NULL;')
-    console.log(managers)
+function getManagers () {
+    const managers = db.query('SELECT first_name, last_name, id FROM employee where manager_id is NULL;', function(err, results) {
+        if (err) {
+            throw err
+        }
+        console.log(results)
+        const { firstName, lastName, id} = results;
+    
+    });
+    
+    return
 }
 
 function getRoles(){
@@ -37,9 +45,9 @@ function viewAllEmployees() {
 }
 
 
-function addEmployee () {
-    // getManagers()
-    
+async function addEmployee () {
+    // const managers = await getManagers()
+    // console.log(managers)
     inquirer 
         .prompt([
             {
@@ -62,7 +70,7 @@ function addEmployee () {
                 type: 'list',
                 message: "Who is this employee's manager?",
                 name: "manager",
-                choices: []
+                choices: ['test']
             },
         ])
         .then((inputs) => {
@@ -70,7 +78,7 @@ function addEmployee () {
             db.query(`
             INSERT INTO employee(first_name, last_name, role_id, manager_id
             VALUES
-            ${firstName},  ${lastName}, ${role}, ${manager})
+            (${firstName},  ${lastName}, ${role}, ${manager})
             `)
         } );
     
@@ -82,8 +90,8 @@ function updateEmployee() {
     inquirer   
         .prompt([
 
-        ])
-}
+        ]).then
+    }
 
 function viewAllRoles() {
     db.execute('SELECT title, salary, name AS department_name FROM role JOIN department ON role.department_id = department.id;', function (err, results) { 
@@ -92,8 +100,30 @@ function viewAllRoles() {
 }
 
 function addRole() {
+    inquirer 
+    .prompt([
+        {
+            type: 'input',
+            message: "What is this employee's first name?",
+            name: "title"
+        },
+        {
+            type: 'input',
+            message: "What is this employee's last name?",
+            name: "salary"
+        },
+    ]).then((inputs) => {
+        const { title, salary } = inputs;
+        db.query(
+            `INSERT INTO role (title, salary)
+            VALUES
+            (${title}, ${salary})`
+        )
+    }
 
-}
+    )
+    }
+   
 
 function viewAllDepartments(){}
     db.execute('SELECT name FROM department', function (err, results) { console.table(cTable.getTable(results)) })
@@ -154,7 +184,8 @@ function selectOption() {
                     addDepartment()
                 break;
                 case 'Quit':
-                    process.exit()
+
+                break;
             }
         })
 }
