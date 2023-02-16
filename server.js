@@ -28,7 +28,7 @@ function getManagers () {
 
 function getRoles(){
     db.execute('SELECT title, id FROM role', function (err, results) {
-
+            
     })
 }
 
@@ -112,12 +112,17 @@ function addRole() {
             message: "What is this employee's last name?",
             name: "salary"
         },
+        {
+            type: 'input',
+            message: "What department does this role belong to?",
+            name: "department"
+        }
     ]).then((inputs) => {
-        const { title, salary } = inputs;
+        const { title, salary, department } = inputs;
         db.query(
-            `INSERT INTO role (title, salary)
+            `INSERT INTO role (title, salary, department_id)
             VALUES
-            (${title}, ${salary})`
+            (${title}, ${salary}, ${department})`
         )
     }
 
@@ -184,7 +189,7 @@ function selectOption() {
                     addDepartment()
                 break;
                 case 'Quit':
-
+                    process.exit()
                 break;
             }
         })
