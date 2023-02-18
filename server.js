@@ -13,29 +13,70 @@ const db = mysql.createConnection(
     console.log('Connected to employee_db')
 );
 
-function getManagers () {
-    const managers = db.query('SELECT first_name, last_name, id FROM employee where manager_id is NULL;', function(err, results) {
-        if (err) {
-            throw err
+// async function getManagers () {
+async function getManagers() {
+    const managerData = await db.promise().query(
+        "SELECT CONCAT(first_name, ' ' , last_name) AS name, id FROM employee where manager_id is NULL;"
+    );
+
+    const managers = managerData[0].map(manager => {
+        container = {
+            name: manager.name,
+            value: {
+                id: manager.id
+            }
         }
-        console.log(results)
-        const { firstName, lastName, id} = results;
-    
-    });
-    
-    return
+        return container;
+    })
+
+    return managers
 }
 
-function getRoles(){
-    db.execute('SELECT title, id FROM role', function (err, results) {
-            
+    // const managers = await db.query('SELECT first_name, last_name, id FROM employee where manager_id is NULL;', function(err, results) {
+    //     if (err) {
+    //         throw err
+    //     }
+    //     console.log(managers)
+    //     return managers
+    
+    // });
+
+// }
+
+async function getRoles(){
+    const rollData = await db.promise().query(
+        "SELECT title AS name, id FROM role"
+    );
+
+    const rolls = rollData[0].map(roll => {
+        container = {
+            name: roll.name,
+            value: {
+                id: roll.id
+            }
+        }
+        return container;
     })
+
+    return rolls
 }
 
-function getDepartments() {
-    db.execute('SELECT name, id FROM department', function (err,results){
+async function getDepartments() {
+    const departmentData = await db.promise().query(
+        "SELECT name, id FROM department"
+    );
 
+    const departments = departmentData[0].map(department => {
+        container = {
+            name: department.name,
+            value: {
+                id: department.id
+            }
+        }
+        return container;
     })
+
+    return departments
 }
 
 function viewAllEmployees() {
@@ -46,8 +87,11 @@ function viewAllEmployees() {
 
 
 async function addEmployee () {
-    // const managers = await getManagers()
+    const rolls = await getRoles()
+    const managers = await getManagers()
+    // const managers = managersData[0].map(manager)
     // console.log(managers)
+
     inquirer 
         .prompt([
             {
@@ -64,22 +108,26 @@ async function addEmployee () {
                 type: 'list',
                 message: "What is this employee's role?",
                 name: "role",
-                choices: ['test']
+                choices: rolls
             },
             {
                 type: 'list',
                 message: "Who is this employee's manager?",
                 name: "manager",
-                choices: ['test']
+                choices: managers
             },
         ])
         .then((inputs) => {
+            console.log(inputs)
+            
             const { firstName, lastName, role, manager } = inputs
-            db.query(`
-            INSERT INTO employee(first_name, last_name, role_id, manager_id
-            VALUES
-            (${firstName},  ${lastName}, ${role}, ${manager})
-            `)
+
+            console.log(role.id)
+            // db.query(`
+            // INSERT INTO employee(first_name, last_name, role_id, manager_id
+            // VALUES
+            // (${firstName},  ${lastName}, ${role}, ${manager})
+            // `)
         } );
     
 }
@@ -153,6 +201,18 @@ function addDepartment() {
         })
 }
 
+function updateDepartment() {
+    getDepartments() 
+    inquirer
+        .prompt([
+            {
+                type: 'list',
+                message: 'Please choose the department you would like to edit',
+                name: 'departmentChoice',
+                choices: ['test']
+            }
+        ])
+}
 function selectOption() {
     inquirer
         .prompt([
@@ -190,8 +250,9 @@ function selectOption() {
                 break;
                 case 'Quit':
                     process.exit()
-                break;
             }
+            // selectOption()
+
         })
 }
 
