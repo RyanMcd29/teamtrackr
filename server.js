@@ -100,9 +100,17 @@ async function getDepartments() {
 }
 
 function viewAllEmployees() {
-        db.execute('SELECT first_name, last_name, title, salary, name AS department_name FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id;', function (err, results) {
-            console.table(cTable.getTable(results))
-        });
+    db.execute('SELECT first_name, last_name, title, salary, name AS department_name FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id;', function (err, results) {
+        console.table(cTable.getTable(results))
+        selectOption();
+    })
+}
+
+function employeeByManager () {
+    db.execute('SELECT first_name, last_name, manager_id FROM employee WHERE manager_id IS NOT NULL GROUP BY manager_id; ', function (err, results) {
+        console.table(cTable.getTable(results))
+        selectOption();
+    })
 }
 
 
@@ -138,23 +146,25 @@ async function addEmployee () {
             },
         ])
         .then((inputs) => {
-            console.log(inputs)
+            // console.log(inputs)
             
             const { firstName, lastName, role, manager } = inputs
 
-            console.log(role.id)
+            // console.log(role.id)
             db.query(`
             INSERT INTO employee(first_name, last_name, role_id, manager_id)
             VALUES
-            (${firstName},  ${lastName}, ${role.id}, ${manager.id})`, (err, result) => {
+            ("${firstName}",  "${lastName}", ${role.id}, ${manager.id});`, (err, result) => {
                 if (err) {
                   console.log(err);
                 } else {
                     console.log(`Added new employee`)
+                    selectOption();
                 }
             })
 
-        } );
+        } )
+        
     
 }
 
@@ -162,7 +172,7 @@ async function updateEmployee() {
     const employees = await getEmployees()
     const roles = await getRoles()
     const managers = await getManagers()
-    console.log(employees)
+    // console.log(employees)
     
     inquirer   
         .prompt([
@@ -188,14 +198,18 @@ async function updateEmployee() {
             .then((inputs) => {
                 const { employee, role, manager } = inputs 
                 db.query(`UPDATE employee SET role_id = ${role.id}, manager_id = ${manager.id} WHERE id = ${employee.id};`)
+                selectOption();
             })
     }
 
-
+function viewAllRoles() {
+        db.execute('SELECT title, salary, name AS department FROM role JOIN department ON role.department_id = department.id;', function (err, results) { console.table(cTable.getTable(results)) })
+        selectOption()
+    }
 
 async function addRole() {
     const departments = await getDepartments()
-    console.log(departments)
+    // console.log(departments)
     inquirer 
     .prompt([
         {
@@ -219,12 +233,13 @@ async function addRole() {
         db.query(
             `INSERT INTO role (title, salary, department_id)
             VALUES
-            (${title}, ${salary}, ${department.id});`, (err, results) => {
+            ("${title}", "${salary}", ${department.id});`, (err, results) => {
             
                 if (err) {
                     console.log(err);
                 } else {
                     console.log(`Added new role`)
+                    selectOption()
                 }
             }
         )
@@ -234,9 +249,11 @@ async function addRole() {
     }
    
 
-function viewAllDepartments(){}
-    db.execute('SELECT name FROM department', function (err, results) { console.table(cTable.getTable(results)) })
-
+function viewAllDepartments(){
+    db.execute('SELECT * FROM department;', function (err, results) { console.table(cTable.getTable(results)) })
+    selectOption()
+}
+    
 function addDepartment() {
     inquirer
         .prompt([
@@ -252,8 +269,14 @@ function addDepartment() {
             db.query(`
             INSERT INTO department(name)
                 VALUES
-                    (${name})
-            `)    
+                ("${name}")`, (err, results) => {
+                    if (err) {
+                        console.log(err);
+                        console.log(`Added new department ${name}`)
+                    } else {
+                        selectOption()
+                    }
+            })    
         })
 }
 
@@ -285,6 +308,7 @@ function updateDepartment() {
                 })
         )
 }
+
 function selectOption() {
     inquirer
         .prompt([
@@ -292,15 +316,21 @@ function selectOption() {
                 type: 'list',
                 message: 'What would you like to do next?',
                 name: 'menuOption',
-                choices: [  'View All Employees', 'Add Employee', 'Update Employee Role',
-                            'View All Roles', 'Add Role', 'View All Departments', 'Add Department',
+                choices: [  'View All Employees',
+                            'Show Employees by Manager',
+                            'Add Employee', 
+                            'Update Employee Role',
+                            'View All Roles', 
+                            'Add Role', 
+                            'View All Departments', 
+                            'Add Department',
                             'Quit'  ]
             }
         ])
-        .then((answer) => {
+        .then(async (answer) => {
             switch (answer.menuOption){
                 case 'View All Employees':
-                    viewAllEmployees()
+                    await viewAllEmployees()
                 break;
                 case 'Add Employee':
                     addEmployee()
@@ -308,13 +338,16 @@ function selectOption() {
                 case 'Update Employee Role':
                     updateEmployee()
                 break;
+                case 'Show Employees by Manager':
+                    employeeByManager()
+                break;
                 case 'View All Roles':
                     viewAllRoles()
                 break;
                 case 'Add Role':
                     addRole()
                 break;
-                case 'View Department':
+                case 'View All Departments':
                     viewAllDepartments()
                 break;
                 case 'Add Department':
@@ -323,7 +356,7 @@ function selectOption() {
                 case 'Quit':
                     process.exit()
             }
-            // selectOption()
+            
 
         })
 }
