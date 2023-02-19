@@ -123,11 +123,19 @@ async function addEmployee () {
             const { firstName, lastName, role, manager } = inputs
 
             console.log(role.id)
-            // db.query(`
-            // INSERT INTO employee(first_name, last_name, role_id, manager_id
-            // VALUES
-            // (${firstName},  ${lastName}, ${role}, ${manager})
-            // `)
+            db.query(`
+            INSERT INTO employee(first_name, last_name, role_id, manager_id)
+            VALUES
+            (${firstName},  ${lastName}, ${role.id}, ${manager.id})
+            `, (err, result) => {
+                if (err) {
+                  console.log(err);
+                } else {
+                    console.log(`Added new employee`)
+                }
+                ;
+            })
+
         } );
     
 }
