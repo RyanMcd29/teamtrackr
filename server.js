@@ -13,6 +13,26 @@ const db = mysql.createConnection(
     console.log('Connected to employee_db')
 );
 
+async function getEmployees() {
+    const employeeData = await db.promise().query(
+        "SELECT CONCAT(first_name, ' ' , last_name) AS name, id, manager_id, role_id FROM employee;"
+    );
+
+    const employees = employeeData[0].map(employee => {
+        container = {
+            name: employee.name,
+            value: {
+                id: employee.id,
+                managerID: employee.manager_id,
+                role: employee.role_id,
+            }
+        }
+        return container;
+    })
+
+    return employees
+}
+
 // async function getManagers () {
 async function getManagers() {
     const managerData = await db.promise().query(
@@ -44,21 +64,21 @@ async function getManagers() {
 // }
 
 async function getRoles(){
-    const rollData = await db.promise().query(
+    const roleData = await db.promise().query(
         "SELECT title AS name, id FROM role"
     );
 
-    const rolls = rollData[0].map(roll => {
+    const roles = roleData[0].map(role => {
         container = {
-            name: roll.name,
+            name: role.name,
             value: {
-                id: roll.id
+                id: role.id
             }
         }
         return container;
     })
 
-    return rolls
+    return roles
 }
 
 async function getDepartments() {
@@ -87,7 +107,7 @@ function viewAllEmployees() {
 
 
 async function addEmployee () {
-    const rolls = await getRoles()
+    const roles = await getRoles()
     const managers = await getManagers()
     // const managers = managersData[0].map(manager)
     // console.log(managers)
@@ -108,7 +128,7 @@ async function addEmployee () {
                 type: 'list',
                 message: "What is this employee's role?",
                 name: "role",
-                choices: rolls
+                choices: roles
             },
             {
                 type: 'list',
@@ -138,20 +158,40 @@ async function addEmployee () {
     
 }
 
-function updateEmployee() {
-    let employeeNames = db.execute('SELECT id, first_name, last_name FROM employee', function (err, results) {results});
-    console.log(employeeNames)
+async function updateEmployee() {
+    const employees = await getEmployees()
+    const roles = await getRoles()
+    const managers = await getManagers()
+    console.log(employees)
+    
     inquirer   
         .prompt([
-
-        ]).then
+            {
+                type:  'list',
+                message: 'Which employee would you like to update?',
+                name: 'employee',
+                choices: employees
+            },
+            {
+                type: 'list',
+                message: "What is this employee's role?",
+                name: "role",
+                choices: roles
+            },
+            {
+                type: 'list',
+                message: "Who is this employee's manager?",
+                name: "manager",
+                choices: managers
+            },
+        ])
+            .then((inputs) => {
+                const { employee, role, manager } = inputs 
+                db.query(`UPDATE employee SET role_id = ${role.id}, manager_id = ${manager.id} WHERE id = ${employee.id};`)
+            })
     }
 
-function viewAllRoles() {
-    db.execute('SELECT title, salary, name AS department_name FROM role JOIN department ON role.department_id = department.id;', function (err, results) { 
-        console.table(cTable.getTable(results)) 
-    })
-}
+
 
 async function addRole() {
     const departments = await getDepartments()
@@ -228,6 +268,22 @@ function updateDepartment() {
                 choices: departments
             }
         ])
+        .then (
+            inquirer
+                .prompt([
+                    {
+                        type: 'input',
+                        message: 'What is the new name of this department?',
+                        name: 'name'
+                    }
+                ])
+                .then((input) => 
+                {
+                    const { name } = input;
+                    db.query(`
+                    UPDATE department SET name = ${name} WHERE id = ${department.id};`)    
+                })
+        )
 }
 function selectOption() {
     inquirer
@@ -267,7 +323,7 @@ function selectOption() {
                 case 'Quit':
                     process.exit()
             }
-            // selectOption()
+            selectOption()
 
         })
 }
