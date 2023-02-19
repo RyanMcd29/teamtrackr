@@ -126,14 +126,12 @@ async function addEmployee () {
             db.query(`
             INSERT INTO employee(first_name, last_name, role_id, manager_id)
             VALUES
-            (${firstName},  ${lastName}, ${role.id}, ${manager.id})
-            `, (err, result) => {
+            (${firstName},  ${lastName}, ${role.id}, ${manager.id})`, (err, result) => {
                 if (err) {
                   console.log(err);
                 } else {
                     console.log(`Added new employee`)
                 }
-                ;
             })
 
         } );
@@ -155,30 +153,40 @@ function viewAllRoles() {
     })
 }
 
-function addRole() {
+async function addRole() {
+    const departments = await getDepartments()
+    console.log(departments)
     inquirer 
     .prompt([
         {
             type: 'input',
-            message: "What is this employee's first name?",
+            message: "What is this role's title?",
             name: "title"
         },
         {
             type: 'input',
-            message: "What is this employee's last name?",
+            message: "What is this role's salary?",
             name: "salary"
         },
         {
-            type: 'input',
+            type: 'list',
             message: "What department does this role belong to?",
-            name: "department"
+            name: "department",
+            choices: departments
         }
     ]).then((inputs) => {
         const { title, salary, department } = inputs;
         db.query(
             `INSERT INTO role (title, salary, department_id)
             VALUES
-            (${title}, ${salary}, ${department})`
+            (${title}, ${salary}, ${department.id});`, (err, results) => {
+            
+                if (err) {
+                    console.log(err);
+                } else {
+                    console.log(`Added new role`)
+                }
+            }
         )
     }
 
@@ -210,14 +218,14 @@ function addDepartment() {
 }
 
 function updateDepartment() {
-    getDepartments() 
+    const departments = getDepartments() 
     inquirer
         .prompt([
             {
                 type: 'list',
                 message: 'Please choose the department you would like to edit',
                 name: 'departmentChoice',
-                choices: ['test']
+                choices: departments
             }
         ])
 }
