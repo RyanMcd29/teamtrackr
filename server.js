@@ -323,7 +323,7 @@ function selectOption() {
                 case 'Quit':
                     process.exit()
             }
-            selectOption()
+            // selectOption()
 
         })
 }
