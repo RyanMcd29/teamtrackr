@@ -117,8 +117,6 @@ function employeeByManager () {
 async function addEmployee () {
     const roles = await getRoles()
     const managers = await getManagers()
-    // const managers = managersData[0].map(manager)
-    // console.log(managers)
 
     inquirer 
         .prompt([
@@ -309,6 +307,35 @@ function updateDepartment() {
         )
 }
 
+async function ViewUtilisedBudgetOfDeparment () {
+    const departments = await getDepartments();
+    inquirer
+        .prompt([
+            {
+                type: 'list',
+                message: 'Please select the department you would like to view the budget for',
+                name: 'departmentChoice',
+                choices: departments
+            }
+        ])
+        .then((input) => 
+        {
+           const id = input.departmentChoice.id
+
+            db.query(
+                ` SELECT SUM(salary) AS utilised_budget FROM role WHERE department_id = ${id}`, 
+                function (err, results) { 
+                        if (err) {
+                            console.log(err)
+                        }
+                        console.table(cTable.getTable(results)) 
+                }
+            )
+
+            selectOption()
+        })
+}
+
 function selectOption() {
     inquirer
         .prompt([
@@ -324,6 +351,7 @@ function selectOption() {
                             'Add Role', 
                             'View All Departments', 
                             'Add Department',
+                            'View Utilised Budget of Department',
                             'Quit'  ]
             }
         ])
@@ -352,6 +380,11 @@ function selectOption() {
                 break;
                 case 'Add Department':
                     addDepartment()
+                break;
+                case 'Update Department':
+                    updateDepartment()
+                case 'View Utilised Budget of Department':
+                    ViewUtilisedBudgetOfDeparment()
                 break;
                 case 'Quit':
                     process.exit()
