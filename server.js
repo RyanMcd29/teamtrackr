@@ -1,8 +1,5 @@
-const mysql = require ('mysql2')
 const inquirer = require('inquirer')
 const cTable = require('console.table');
-
-
 const db = mysql.createConnection(
     {
         host: 'localhost',
@@ -208,8 +205,6 @@ async function addEmployee () {
             })
 
         } )
-        
-    
 }
 
 async function updateEmployee() {
@@ -318,6 +313,7 @@ function addDepartment() {
                 name: 'name'
             }
         ])
+
         .then((input) => 
         {
             const { name } = input;
