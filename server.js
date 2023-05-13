@@ -113,10 +113,27 @@ function employeeByManager () {
     })
 }
 
+function getIdsForManagerPositions (roles) {
+    console.log(roles)
+    const managerRoles = roles.filter(role => {
+        console.log(role)
+        if (role.name == 'Manager'){
+            return role.value.id
+        }
+    })
+
+    const managerIDs = managerRoles.map((manager)=>{
+        return manager.value.id
+    })
+
+    console.log(managerIDs)
+    return managerIDs
+}
 
 async function addEmployee () {
     const roles = await getRoles()
     const managers = await getManagers()
+    const managerIDs = getIdsForManagerPositions(roles)
 
     inquirer 
         .prompt([
@@ -140,13 +157,16 @@ async function addEmployee () {
                 type: 'list',
                 message: "Who is this employee's manager?",
                 name: "manager",
-                choices: managers
+                choices: managers,
+                when: (answers) => !managerIDs.includes(answers.role.id)
             },
         ])
         .then((inputs) => {
-            // console.log(inputs)
-            
-            const { firstName, lastName, role, manager } = inputs
+            // uses var to pass update if no manager
+            var { employee, role, manager } = inputs 
+            if (!manager) {
+                manager = employee
+            }
 
             // console.log(role.id)
             db.query(`
@@ -170,21 +190,7 @@ async function updateEmployee() {
     const employees = await getEmployees()
     const roles = await getRoles()
     const managers = await getManagers()
-
-    // Get manager role id
-    console.log(roles)
-    const managerRoles = roles.filter(role => {
-        console.log(role)
-        if (role.name == 'Manager'){
-            return role.value.id
-        }
-    })
-
-    const managerIDs = managerRoles.map((manager)=>{
-        return manager.value.id
-    })
-
-    console.log(managerIDs)
+    const managerIDs = getIdsForManagerPositions(roles)    
     
     inquirer   
         .prompt([
