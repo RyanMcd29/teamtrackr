@@ -100,18 +100,41 @@ async function getDepartments() {
 }
 
 function viewAllEmployees() {
-    db.execute('SELECT first_name, last_name, title, salary, name AS department_name FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id;', function (err, results) {
+    db.execute('SELECT first_name, last_name, manager_id, title, salary, name AS department_name FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id;', function (err, results) {
         console.table(cTable.getTable(results))
         selectOption();
     })
 }
 
-function employeeByManager () {
-    db.execute('SELECT first_name, last_name, manager_id FROM employee WHERE manager_id IS NOT NULL GROUP BY manager_id; ', function (err, results) {
-        console.table(cTable.getTable(results))
-        selectOption();
-    })
+async function employeeByManager () {
+    const managers = await getManagers()
+    
+    inquirer   
+            .prompt([
+                {
+                    type:  'list',
+                    message: 'Which manager would you like to view?',
+                    name: 'manager',
+                    choices: managers
+                },
+            ])
+                .then((inputs) => {
+                    // uses var to pass update if no manager
+                    const {  manager } = inputs 
+
+                    db.execute(`SELECT * FROM employee WHERE manager_id = ${manager.id};`, 
+                    function (err, results) { 
+
+                        if (!results) {
+                            console.log('No employees belong to this manager')
+                        }
+                        
+                        console.table(cTable.getTable(results))
+                    })
+                    selectOption()
+                })
 }
+
 
 function getIdsForManagerPositions (roles) {
     console.log(roles)
@@ -163,16 +186,19 @@ async function addEmployee () {
         ])
         .then((inputs) => {
             // uses var to pass update if no manager
-            var { employee, role, manager } = inputs 
-            if (!manager) {
-                manager = employee
+            var { firstName, lastName, role, manager } = inputs 
+            
+            if (manager) {
+                manager = manager.id
+            } else {
+                manager = null
             }
 
             // console.log(role.id)
             db.query(`
             INSERT INTO employee(first_name, last_name, role_id, manager_id)
             VALUES
-            ("${firstName}",  "${lastName}", ${role.id}, ${manager.id});`, (err, result) => {
+            ("${firstName}",  "${lastName}", ${role.id}, ${manager});`, (err, result) => {
                 if (err) {
                   console.log(err);
                 } else {
@@ -217,10 +243,16 @@ async function updateEmployee() {
             .then((inputs) => {
                 // uses var to pass update if no manager
                 var { employee, role, manager } = inputs 
-                if (!manager) {
-                    manager = employee
+                
+                if (manager) {
+                    manager = manager.id
+                } else {
+                    manager = null
                 }
-                db.query(`UPDATE employee SET role_id = ${role.id}, manager_id = ${manager.id} WHERE id = ${employee.id};`)
+
+
+
+                db.query(`UPDATE employee SET role_id = ${role.id}, manager_id = ${manager} WHERE id = ${employee.id};`)
                 selectOption();
             })
     }
