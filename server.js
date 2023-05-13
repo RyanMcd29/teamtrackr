@@ -170,7 +170,21 @@ async function updateEmployee() {
     const employees = await getEmployees()
     const roles = await getRoles()
     const managers = await getManagers()
-    // console.log(employees)
+
+    // Get manager role id
+    console.log(roles)
+    const managerRoles = roles.filter(role => {
+        console.log(role)
+        if (role.name == 'Manager'){
+            return role.value.id
+        }
+    })
+
+    const managerIDs = managerRoles.map((manager)=>{
+        return manager.value.id
+    })
+
+    console.log(managerIDs)
     
     inquirer   
         .prompt([
@@ -190,11 +204,16 @@ async function updateEmployee() {
                 type: 'list',
                 message: "Who is this employee's manager?",
                 name: "manager",
-                choices: managers
+                choices: managers,
+                when: (answers) => !managerIDs.includes(answers.role.id)
             },
         ])
             .then((inputs) => {
-                const { employee, role, manager } = inputs 
+                // uses var to pass update if no manager
+                var { employee, role, manager } = inputs 
+                if (!manager) {
+                    manager = employee
+                }
                 db.query(`UPDATE employee SET role_id = ${role.id}, manager_id = ${manager.id} WHERE id = ${employee.id};`)
                 selectOption();
             })
