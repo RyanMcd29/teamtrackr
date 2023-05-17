@@ -235,13 +235,17 @@ async function updateEmployee() {
 
 
                 db.query(`UPDATE employee SET role_id = ${role.id}, manager_id = ${manager} WHERE id = ${employee.id};`)
+                console.log(`Updated employee`)
                 selectOption();
             })
     }
 
 function viewAllRoles() {
-        db.execute('SELECT title, salary, name AS department FROM role JOIN department ON role.department_id = department.id;', function (err, results) { console.table(cTable.getTable(results)) })
-        selectOption()
+        db.execute('SELECT title, salary, name AS department FROM role JOIN department ON role.department_id = department.id;', function (err, results) { 
+            console.table(cTable.getTable(results))
+            selectOption() 
+        })
+
     }
 
 async function addRole() {
@@ -274,7 +278,7 @@ async function addRole() {
                 if (err) {
                     console.log(err);
                 } else {
-                    console.log(`Added new role`)
+                    console.log(`Added new role ${title}`)
                     selectOption()
                 }
             }
@@ -286,8 +290,11 @@ async function addRole() {
    
 
 function viewAllDepartments(){
-    db.execute('SELECT * FROM department;', function (err, results) { console.table(cTable.getTable(results)) })
-    selectOption()
+    db.execute('SELECT * FROM department;', function (err, results) { 
+        console.table(cTable.getTable(results))
+        selectOption() 
+    })
+   
 }
     
 function addDepartment() {
@@ -309,8 +316,8 @@ function addDepartment() {
                 ("${name}")`, (err, results) => {
                     if (err) {
                         console.log(err);
-                        console.log(`Added new department ${name}`)
                     } else {
+                        console.log(`Added new department ${name}`)
                         selectOption()
                     }
             })    
