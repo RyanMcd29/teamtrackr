@@ -50,17 +50,6 @@ async function getManagers() {
     return managers
 }
 
-    // const managers = await db.query('SELECT first_name, last_name, id FROM employee where manager_id is NULL;', function(err, results) {
-    //     if (err) {
-    //         throw err
-    //     }
-    //     console.log(managers)
-    //     return managers
-    
-    // });
-
-// }
-
 async function getRoles(){
     const roleData = await db.promise().query(
         "SELECT title AS name, id FROM role"
@@ -128,16 +117,15 @@ async function employeeByManager () {
                         }
                         
                         console.table(cTable.getTable(results))
+                        selectOption()
                     })
-                    selectOption()
+                    
                 })
 }
 
 
 function getIdsForManagerPositions (roles) {
-    console.log(roles)
     const managerRoles = roles.filter(role => {
-        console.log(role)
         if (role.name == 'Manager'){
             return role.value.id
         }
@@ -147,7 +135,6 @@ function getIdsForManagerPositions (roles) {
         return manager.value.id
     })
 
-    console.log(managerIDs)
     return managerIDs
 }
 
@@ -192,7 +179,6 @@ async function addEmployee () {
                 manager = null
             }
 
-            // console.log(role.id)
             db.query(`
             INSERT INTO employee(first_name, last_name, role_id, manager_id)
             VALUES
@@ -260,7 +246,6 @@ function viewAllRoles() {
 
 async function addRole() {
     const departments = await getDepartments()
-    // console.log(departments)
     inquirer 
     .prompt([
         {
@@ -383,10 +368,11 @@ async function ViewUtilisedBudgetOfDeparment () {
                             console.log(err)
                         }
                         console.table(cTable.getTable(results)) 
+                        selectOption()
                 }
             )
 
-            selectOption()
+            
         })
 }
 
@@ -433,7 +419,7 @@ function selectOption() {
                     viewAllDepartments()
                 break;
                 case 'Add Department':
-
+                    addDepartment()
                 break;
                 case 'Update Department':
                     updateDepartment()
